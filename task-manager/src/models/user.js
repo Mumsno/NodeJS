@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs')
 const jtw = require('jsonwebtoken')
 const Task = require('./task')
 
-const SECRET = "mosheShitrit"
+const SECRET = process.env.JWT_SECRET
 
 const userSchema = mongoose.Schema({
     name: {
@@ -54,9 +54,9 @@ const userSchema = mongoose.Schema({
         }
     }]
 },
-{
-    timestamps: true
-})
+    {
+        timestamps: true
+    })
 
 userSchema.statics.findByCredentials = async (email, password) => {
     const user = await User.findOne({ email })
@@ -103,7 +103,7 @@ userSchema.pre('save', async function (next) {
     next()
 })
 
-userSchema.pre('deleteOne', {document: true, query: false}, async function (next) {
+userSchema.pre('deleteOne', { document: true, query: false }, async function (next) {
     const user = this
     const tasks = await Task.find({ owner: user._id })
     debugger;
