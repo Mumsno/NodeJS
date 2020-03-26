@@ -21,7 +21,26 @@ router.post('/tasks', auth, async (req, res) => {
 
 router.get('/tasks', auth, async (req, res) => {
     try {
-        await req.user.populate('tasks').execPopulate()
+        const match = {}
+        const sort = {}
+
+        if (req.query.completed) {
+            match.completed = req.query.completed === 'true'
+        }
+
+        if (req.query.sortBy) {
+            const parts = req.query.sortBy.split(':')
+            sort[parts[0]] = parts[1] === 'desc' ? -1 : 1
+        }
+        await req.user.populate({
+            path: 'tasks',
+            match,
+            options: {
+                limit: parseInt(req.query.limit),
+                skip: parseInt(req.query.skip),
+                sort
+            }
+        }).execPopulate()
         res.send(req.user.tasks)
     } catch (e) {
         res.send(500).send()
